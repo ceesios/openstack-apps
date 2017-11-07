@@ -1,9 +1,7 @@
 # OpenStack Apps
-
 This repository will contain userdata for *apps* and/or *images* to be used on the CloudVPS OpenStack environment.
 
 ## Structure
-
 The basic folder structure is based on these properties of a glance image: *os_type / os_distro / os_version.userdata*
 
 This *userdata* file is used as-is, and passed as-is to the OpenStack Compute API as [userdata](https://docs.openstack.org/nova/latest/user/user-data.html) parameter.
@@ -24,3 +22,8 @@ If there is no image in glance, then a *os_version.metadata* file is required, t
 ```
 
 The image_ref field can be a glance image uuid, but using the glance image name is preferred, as images are updated regularly and uuid's will be different.
+
+## Automation
+To generate a all.json file, you can run `_generate_all.py`.
+
+It will read all files in the repository and merge them into a *all.json* file. Userdata will be included as references to the file.
