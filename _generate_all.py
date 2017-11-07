@@ -8,8 +8,6 @@ cwd = os.path.dirname(os.path.abspath(__file__))
 if cwd == '':
     cwd = '.'
 
-print cwd
-
 struct = {}
 
 def add_to_struct(os_type, os_distro, os_version, key, val):
@@ -27,15 +25,17 @@ def add_metadata(directory, metadata):
     path, os_type = os.path.split(path)
     os_version, ext = os.path.splitext(metadata)
 
+    metadata_path = '/'.join([os_type, os_distro, metadata])
+
     with open(os.path.join(directory, metadata), 'rb') as fh:
         try:
             data = json.load(fh)
         except Exception as e:
-            logging.exception(e)
+            logging.exception('Error importing metadata for %s:' % metadata_path)
             return
 
         add_to_struct(os_type, os_distro, os_version, 'metadata', data)
-        print 'Imported metadata for %s' % os.path.join(os_type, os_distro, metadata)
+        print 'Added metadata for %s' % metadata_path
 
 def add_userdata(directory, userdata):
     path, os_distro = os.path.split(directory)
@@ -52,6 +52,9 @@ for (dirpath, dirnames, filenames) in os.walk(cwd):
 
     for file in filenames:
         if file[0] == '.':
+            continue
+        if os.path.getsize(os.path.join(dirpath, file)) == 0:
+            print 'Skipping empty file %s' % (os.path.join(dirpath, file))
             continue
 
         img, filetype = file.rsplit('.', 1)
