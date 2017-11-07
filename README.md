@@ -16,8 +16,9 @@ If there is no image in glance, then a *os_version.metadata* file is required, t
     "name": "My Super App",
     "description": "This is my extended description of this super app that i've developed",
     "image_ref": "Ubuntu 16.04 (LTS)",
+    "min_disk": 40,
     "min_ram": 512,
-    "min_disk": 40
+    "min_vcpu": 1
 }
 ```
 
