@@ -1,0 +1,7 @@
+{
+    "name": "LAMP Stack",
+    "description": "This App installs Apache, PHP and Mysql on Ubuntu 16.04",
+    "image_ref": "Ubuntu 16.04 (LTS)",
+    "min_ram": 512,
+    "min_disk": 40
+}

@@ -1,0 +1,12 @@
+#! /bin/sh -v
+apt-get update
+
+MYSQL_ROOT_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+
+echo "mysql-server-5.7 mysql-server/root_password password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
+echo "mysql-server-5.7 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
+
+apt-get install apache2 mysql-server php php-mysql php-curl php-gd php-mcrypt mysql-client -y
+systemctl start apache2
+systemctl start mysql
+
