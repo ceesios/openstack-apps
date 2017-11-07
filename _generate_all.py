@@ -60,8 +60,10 @@ for (dirpath, dirnames, filenames) in os.walk(cwd):
         img, filetype = file.rsplit('.', 1)
         if filetype == 'metadata':
             add_metadata(dirpath, file)
-        if filetype == 'userdata':
+        elif filetype == 'userdata':
             add_userdata(dirpath, file)
+        else:
+            print 'Ignoring file %s (not metadata or userdata)' % (os.path.join(dirpath, file))
 
 if struct:
     with open(os.path.join(cwd, 'all.json'), 'wb') as fh:
