@@ -4,9 +4,7 @@ This repository will contain userdata for *apps* and/or *images* to be used on t
 
 ## Structure
 
-The basic folder structure is based on these properties of a glance image:
-
-os_type / os_distro / os_version.userdata
+The basic folder structure is based on these properties of a glance image: *os_type / os_distro / os_version.userdata*
 
 This *userdata* file is used as-is, and passed as-is to the OpenStack Compute API as [userdata](https://docs.openstack.org/nova/latest/user/user-data.html) parameter.
 
