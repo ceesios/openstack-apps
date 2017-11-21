@@ -7,7 +7,7 @@ echo "mysql-server-5.7 mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
 echo "mysql-server-5.7 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
 
 # Install the necessary packages
-apt-get install apache2 mysql-server php php-mysql php-curl php-gd php-mcrypt mysql-client -y
+apt-get install apache2 mysql-server php7.0 libapache2-mod-php7.0 php7.0-mysql php7.0-curl php7.0-gd php7.0-mcrypt mysql-client -y
 systemctl start apache2
 systemctl start mysql
 
@@ -27,7 +27,12 @@ echo "
 
 wget http://download.cloudvps.com/getting_started_page/index.html.post -O - >> /var/www/html/index.html
 
-## start motd
+# Setup a phpinfo test page
+echo "<?php
+phpinfo();
+?>" > /var/www/html/info.php
+
+## Set a motd banner
 echo "================================================================================
 Thank you for using a CloudVPS LAMP stack instance.
 
@@ -39,13 +44,23 @@ If you need support, please see https://www.cloudvps.nl/helpcenter/.
 
 To remove this message:
 
-    vim /etc/motd
+    echo > /etc/motd
 
 To remove the mysql_secure_installation script that runs at every SSH login:
 
     echo > /etc/cloudvps/logon.sh
 
 The logon script will also remove itself after it has run succesfully.
+
+================================================================================
+
+If you need additional php modules you can list them with
+
+    apt-cache search php7
+
+And install them with
+
+    apt install php7.0-<module name>
 
 ================================================================================
 " > /etc/motd
