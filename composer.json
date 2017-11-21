@@ -1,0 +1,11 @@
+{
+    "name": "cloudvps/openstack-apps",
+    "description": "This repository will contain userdata for apps and/or image",
+    "authors": [
+        {
+            "name": "CloudVPS",
+            "email": "support@cloudvps.nl"
+        }
+    ],
+    "require": {}
+}
