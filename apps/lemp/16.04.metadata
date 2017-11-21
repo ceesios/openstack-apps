@@ -1,0 +1,7 @@
+{
+    "name": "LEMP Stack",
+    "description": "This App installs NGINX, PHP-FPM and MySQL on Ubuntu 16.04",
+    "image_ref": "Ubuntu 16.04 (LTS)",
+    "min_ram": 512,
+    "min_disk": 40
+}

@@ -1,0 +1,139 @@
+#! /bin/bash
+apt-get update
+
+# Generate a temporary mysql root password
+MYSQL_ROOT_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+echo "mysql-server-5.7 mysql-server/root_password password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
+echo "mysql-server-5.7 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
+
+# Install the necessary packages
+apt-get install nginx mysql-server php7.0-fpm php7.0-mysql php7.0-curl php7.0-gd php7.0-mcrypt mysql-client -y
+systemctl start nginx
+systemctl start mysql
+systemctl start php7.0-fpm
+
+mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default_without_php_fpm
+
+echo "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.php index.html index.htm index.nginx-debian.html;
+
+    server_name $(curl -s ip.cloudvps.nl);
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+}
+" > /etc/nginx/sites-available/default
+systemctl reload nginx
+
+
+# Setup the CloudVPS getting started page
+mv /var/www/html/index.html /var/www/html/index.html.orig
+
+wget -O /var/www/html/style.css http://download.cloudvps.com/getting_started_page/style.css
+wget -O /var/www/html/index.html http://download.cloudvps.com/getting_started_page/index.html.pre
+echo "
+                                <h1>SSH login required</h1>
+				<p>Please log in via SSH to configure Apache and complete the MySQL secure setup.</p>
+
+                                <h1>Inloggen via SSH vereist</h1>
+                                <p>Log in via SSH om Apache te configureren en de MySQL secure setup af te ronden.</p>
+
+" >> /var/www/html/index.html
+
+wget http://download.cloudvps.com/getting_started_page/index.html.post -O - >> /var/www/html/index.html
+
+# Setup a phpinfo test page
+echo "<?php
+phpinfo();
+?>" > /var/www/html/info.php
+
+## start motd
+echo "================================================================================
+Thank you for using a CloudVPS LAMP stack instance.
+
+Your LAMP stack is now ready for use.
+Please navigate to http://$(curl -s ip.cloudvps.nl) to access your LAMP Stack.
+Your documentroot is located at /var/www/html/
+
+If you need support, please see https://www.cloudvps.nl/helpcenter/.
+
+To remove this message:
+
+    echo > /etc/motd
+
+To remove the mysql_secure_installation script that runs at every SSH login:
+
+    echo > /etc/cloudvps/logon.sh
+
+The logon script will also remove itself after it has run succesfully.
+
+================================================================================
+
+If you need additional php modules you can list them with
+
+    apt-cache search php7
+
+And install them with
+
+    apt install php7.0-<module name>
+
+================================================================================
+" > /etc/motd
+
+
+# Set the logon script
+mkdir /etc/cloudvps
+echo "
+#!/bin/bash
+# Copyright (C) 2017 CloudVPS.
+# Author: Remy van Elst, Cees Moerkerken, https://www.cloudvps.com
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+# If not running interactively, don't do anything
+if [[ ! -t 0 ]]; then exit; fi
+
+echo 'Running mysql secure installation.
+You can cancel this wit Ctrl + C'
+read -n1 -r -p 'Press any other key to continue...' key
+
+# Start mysql_secure_installation
+mysql_secure_installation -u debian-sys-maint -p$(grep password /etc/mysql/debian.cnf -m1 | cut -d ' ' -f3)
+
+echo '
+Do not forget that root and debian-sys-maint are only available from localhost'
+
+#Copy the debian.cnf to .my.cnf so you can login with the mysql client.
+cp /etc/mysql/debian.cnf .my.cnf
+
+# Clean this script
+echo > /etc/cloudvps/logon.sh
+" > /etc/cloudvps/logon.sh
+                                                     
+chmod +x /etc/cloudvps/logon.sh
+
+echo '/etc/cloudvps/logon.sh' >> /root/.bashrc
+
