@@ -23,6 +23,20 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+# Set the temporary logon script during install
+mkdir /etc/cloudvps
+
+echo "# If not running interactively, don't do anything
+if [[ ! -t 0 ]]; then exit; fi
+
+echo "please hold while installing..."
+echo ""
+exit
+" > /etc/cloudvps/logon.sh
+
+chmod +x /etc/cloudvps/logon.sh
+echo '/etc/cloudvps/logon.sh' >> /root/.bashrc
+
 apt-get update
 
 # Generate a temporary mysql root password
@@ -115,8 +129,7 @@ And install them with
 " > /etc/motd
 
 
-# Set the logon script
-mkdir /etc/cloudvps
+# Set the logon script when done
 echo "
 #!/bin/bash
 # Copyright (C) 2017 CloudVPS.
@@ -142,10 +155,10 @@ if [[ ! -t 0 ]]; then exit; fi
 
 while true; do
     read -p 'Do you want to run mysql secure installation?' yn
-    case $yn in
+    case \$yn in
         [Yy]* ) 
           # Start mysql_secure_installation
-          mysql_secure_installation -u debian-sys-maint -pXH9pppEAP4g7eG7A
+          mysql_secure_installation -u debian-sys-maint -p$(grep password /etc/mysql/debian.cnf -m1 | cut -d ' ' -f3)
  
           echo '
           Do not forget that root and debian-sys-maint are only available from localhost'
@@ -155,17 +168,18 @@ while true; do
  
           # Clean this script
           echo > /etc/cloudvps/logon.sh
-          break;;
+          break
+          ;;
         [Nn]* ) 
           # Clean this script
           echo > /etc/cloudvps/logon.sh
-          break;;
-        * ) echo 'Please answer (y)es or (n)ever.';;
+          break
+          ;;
+        * )
+          echo 'Please answer (y)es or (n)ever.'
+          ;;
     esac
 done
 " > /etc/cloudvps/logon.sh
                                                      
-chmod +x /etc/cloudvps/logon.sh
-
-echo '/etc/cloudvps/logon.sh' >> /root/.bashrc
 
