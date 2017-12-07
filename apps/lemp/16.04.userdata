@@ -3,10 +3,10 @@
 # Author: Cees Moerkerken, https://www.cloudvps.com
 # Version: 1.1
 #
-# This is a userdata script that will install a LAMP stack when used
+# This is a userdata script that will install a LEMP stack when used
 # on a ubuntu 16.04 instance. You can use it without cloning:
 # #include
-# https://raw.githubusercontent.com/CloudVPS/openstack-apps/master/apps/lamp/16.04.userdata
+# https://raw.githubusercontent.com/CloudVPS/openstack-apps/master/apps/lemp/16.04.userdata
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -83,10 +83,10 @@ phpinfo();
 
 ## start motd
 echo "================================================================================
-Thank you for using a CloudVPS LAMP stack instance.
+Thank you for using a CloudVPS LEMP stack instance.
 
-Your LAMP stack is now ready for use.
-Please navigate to http://$(curl -s ip.cloudvps.nl) to access your LAMP Stack.
+Your LEMP stack is now ready for use.
+Please navigate to http://$(curl -s ip.cloudvps.nl) to access your LEMP Stack.
 Your documentroot is located at /var/www/html/
 
 If you need support, please see https://www.cloudvps.nl/helpcenter/.
