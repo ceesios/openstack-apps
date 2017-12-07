@@ -1,4 +1,28 @@
-#! /bin/bash
+#!/bin/bash
+# Copyright (C) 2017 CloudVPS.
+# Author: Cees Moerkerken, https://www.cloudvps.com
+# Version: 1.1
+#
+# This is a userdata script that will install a LAMP stack when used
+# on a ubuntu 16.04 instance. You can use it without cloning:
+# #include
+# https://raw.githubusercontent.com/CloudVPS/openstack-apps/master/apps/lamp/16.04.userdata
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
 apt-get update
 
 # Generate a temporary mysql root password
@@ -116,21 +140,29 @@ echo "
 # If not running interactively, don't do anything
 if [[ ! -t 0 ]]; then exit; fi
 
-echo 'Running mysql secure installation.
-You can cancel this wit Ctrl + C'
-read -n1 -r -p 'Press any other key to continue...' key
-
-# Start mysql_secure_installation
-mysql_secure_installation -u debian-sys-maint -p$(grep password /etc/mysql/debian.cnf -m1 | cut -d ' ' -f3)
-
-echo '
-Do not forget that root and debian-sys-maint are only available from localhost'
-
-#Copy the debian.cnf to .my.cnf so you can login with the mysql client.
-cp /etc/mysql/debian.cnf .my.cnf
-
-# Clean this script
-echo > /etc/cloudvps/logon.sh
+while true; do
+    read -p 'Do you want to run mysql secure installation?' yn
+    case $yn in
+        [Yy]* ) 
+          # Start mysql_secure_installation
+          mysql_secure_installation -u debian-sys-maint -pXH9pppEAP4g7eG7A
+ 
+          echo '
+          Do not forget that root and debian-sys-maint are only available from localhost'
+ 
+          #Copy the debian.cnf to .my.cnf so you can login with the mysql client.
+          cp /etc/mysql/debian.cnf .my.cnf
+ 
+          # Clean this script
+          echo > /etc/cloudvps/logon.sh
+          break;;
+        [Nn]* ) 
+          # Clean this script
+          echo > /etc/cloudvps/logon.sh
+          break;;
+        * ) echo 'Please answer (y)es or (n)ever.';;
+    esac
+done
 " > /etc/cloudvps/logon.sh
                                                      
 chmod +x /etc/cloudvps/logon.sh
