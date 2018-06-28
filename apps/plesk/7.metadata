@@ -1,0 +1,7 @@
+{
+    "name": "Plesk",
+    "description": "This App installs Plesk on CentOS 7",
+    "image_ref": "CentOS 7 (LTS)",
+    "min_ram": 512,
+    "min_disk": 40
+}

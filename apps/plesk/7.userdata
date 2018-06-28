@@ -1,0 +1,105 @@
+#!/bin/bash
+# Copyright (C) 2018 CloudVPS.
+# Author: Cees Moerkerken https://www.cloudvps.com
+# Rubberduck: Leon de Jong https://www.cloudvps.com
+# Version: 1.0
+#
+# This is a userdata script that will install Plesk when used
+# on a CentOS 7 instance. You can use it without cloning:
+# #include
+# https://raw.githubusercontent.com/CloudVPS/openstack-apps/master/apps/plesk/7.userdata
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+## Set the temporary logon script during install
+mkdir /etc/cloudvps
+
+echo "# If not running interactively, don't do anything
+if [[ ! -t 0 ]]; then exit; fi
+
+echo "Please hold while we install Plesk for you"
+
+while true; do
+    read -p 'Do you want to tail the Plesk installation log?' yn
+    case \$yn in
+        [Yy]* ) 
+          tail -f /var/log/plesk/install/*installation.log
+          break
+          ;;
+        [Nn]* ) 
+          break
+          ;;
+        * ) echo 'Please answer (y)es or (n)o.';;
+    esac
+done
+" > /etc/cloudvps/logon.sh
+
+chmod +x /etc/cloudvps/logon.sh
+echo '/etc/cloudvps/logon.sh' >> /root/.bashrc
+
+
+## Download the temporary webpage to display during installation
+wget -O /etc/cloudvps/style.css http://download.cloudvps.com/getting_started_page/style.css
+wget -O /etc/cloudvps/index.html http://download.cloudvps.com/getting_started_page/index.html.pre
+echo "
+                                <h1>Plesk installation in progress</h1>
+                                <p>Please hold while plesk is being installed. This might take up to 15 minutes.</p>
+                                <p>for more info see <a href="https://docs.plesk.com/en-US/onyx/deployment-guide/76444/">the Plesk documentation</a></p>
+
+                                <h1>Plesk installatie loopt</h1>
+                                <p>Wacht alstublieft tot Plesk volledig is geinstalleerd.</p>
+                                <p>Voor meer informatie zie <a href="https://docs.plesk.com/en-US/onyx/deployment-guide/76444/">de Plesk documentatie</a></p>
+
+" >> /etc/cloudvps/index.html
+
+wget http://download.cloudvps.com/getting_started_page/index.html.post -O - >> /etc/cloudvps/index.html
+
+
+
+## temporary webserver for instructions, stops after reboot.
+cd /etc/cloudvps && python -m SimpleHTTPServer 80 &
+
+## Start the Plesk One Click Installer
+sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer)
+
+## Stop the temporary webserver
+pkill python > /dev/null
+
+## Restart httpd on port 80
+systemctl restart httpd
+
+
+## start motd
+echo "================================================================================
+Thank you for using a CloudVPS Plesk instance.
+
+Your Plesk instance is now ready for use.
+Please navigate to http://$(curl -s ip.cloudvps.nl):8880 to access your Plesk instnace.
+
+If you need support, please see https://www.cloudvps.nl/helpcenter/.
+
+To remove this message:
+
+    echo > /etc/motd
+
+================================================================================
+" > /etc/motd
+
+
+## Disable the logon script when done
+echo "" > /etc/cloudvps/logon.sh
+                                                     
+
