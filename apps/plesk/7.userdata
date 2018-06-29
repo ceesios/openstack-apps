@@ -75,7 +75,7 @@ wget http://download.cloudvps.com/getting_started_page/index.html.post -O - >> /
 cd /etc/cloudvps && python -m SimpleHTTPServer 80 &
 
 ## Plesk wants to have a hostname in the hosts file.
-echo "$(curl -s ip.cloudvps.nl)  $(hostname)" >> /etc/hosts
+echo "$(curl -s ip.cloudvps.nl)  $(hostname -f)" >> /etc/hosts
 
 ## Start the Plesk One Click Installer
 sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer)
