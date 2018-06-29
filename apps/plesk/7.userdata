@@ -55,12 +55,14 @@ echo '/etc/cloudvps/logon.sh' >> /root/.bashrc
 wget -O /etc/cloudvps/style.css http://download.cloudvps.com/getting_started_page/style.css
 wget -O /etc/cloudvps/index.html http://download.cloudvps.com/getting_started_page/index.html.pre
 echo "
-                                <h1>Plesk installation in progress</h1>
+                                <h1>The latest version of Plesk is being installed for you!</h1>
                                 <p>Please hold while plesk is being installed. This might take up to 15 minutes.</p>
+                                <p>You can follow the installation by logging in trough SSH.</p>
                                 <p>for more info see <a href="https://docs.plesk.com/en-US/onyx/deployment-guide/76444/">the Plesk documentation</a></p>
 
-                                <h1>Plesk installatie loopt</h1>
-                                <p>Wacht alstublieft tot Plesk volledig is geinstalleerd.</p>
+                                <h1>De laatste versie van Plesk wordt ge&iuml;nstalleerd voor u!</h1>
+                                <p>Wacht alstublieft tot Plesk volledig is geinstalleerd. Dit kan tot 15 minuten duren.</p>
+                                <p>U kunt de installatie volgen door in te loggen via SSH.</p>
                                 <p>Voor meer informatie zie <a href="https://docs.plesk.com/en-US/onyx/deployment-guide/76444/">de Plesk documentatie</a></p>
 
 " >> /etc/cloudvps/index.html
@@ -71,6 +73,9 @@ wget http://download.cloudvps.com/getting_started_page/index.html.post -O - >> /
 
 ## temporary webserver for instructions, stops after reboot.
 cd /etc/cloudvps && python -m SimpleHTTPServer 80 &
+
+## Plesk wants to have a hostname in the hosts file.
+echo "$(curl -s ip.cloudvps.nl)  $(hostname)" >> /etc/hosts
 
 ## Start the Plesk One Click Installer
 sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer)
@@ -85,9 +90,13 @@ systemctl restart httpd
 ## start motd
 echo "================================================================================
 Thank you for using a CloudVPS Plesk instance.
-
 Your Plesk instance is now ready for use.
-Please navigate to http://$(curl -s ip.cloudvps.nl):8880 to access your Plesk instnace.
+
+Please navigate to http://$(curl -s ip.cloudvps.nl):8880
+or https://$(curl -s ip.cloudvps.nl):8443 to access your Plesk instance.
+
+You can login to the controlpanel with root and your root password.
+If you can't login you can generate a one-time-token here with "sudo plesk login".
 
 If you need support, please see https://www.cloudvps.nl/helpcenter/.
 
